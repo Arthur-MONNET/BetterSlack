@@ -35,23 +35,17 @@ export const effectiveStatus = (job) => (job.status === 'failed' && job.allowFai
  * and half running wants the failure, now, not when the rest has finished.
  * After that, what is happening, then what is waiting, then what is over.
  *
- * A job waiting for a person says nothing about how the stage went, and neither
- * does one that did not run. They are left out of the answer whenever anything
- * else is in the stage, so a stage of passed jobs and a manual deploy reads as
- * passed. Only when nothing else is there does the stage say `manual` -- and a
- * failure, a failure the pipeline allows, or work still going still shows,
- * because those are in the other jobs.
+ * A job waiting for a person says nothing about how the stage went. It is left
+ * out of the answer whenever anything else is in the stage, so a stage of passed
+ * jobs and a manual deploy reads as passed, and one of skipped jobs and a manual
+ * deploy reads as skipped. Only when nothing else is there does the stage say
+ * `manual` -- and a failure, a failure the pipeline allows, or work still going
+ * still shows, because those are in the other jobs.
  */
 export function stageStatus(jobs) {
   const kinds = jobs.map((job) => kindOf(effectiveStatus(job)));
-  const told = jobs.filter((job) => {
-    const kind = kindOf(effectiveStatus(job));
-    return kind !== 'manual' && kind !== 'skipped';
-  });
-  if (told.length === 0) {
-    if (kinds.includes('manual')) return 'manual';
-    return kinds.length > 0 ? 'skipped' : 'created';
-  }
+  const told = jobs.filter((job) => kindOf(effectiveStatus(job)) !== 'manual');
+  if (told.length === 0) return kinds.length > 0 ? 'manual' : 'created';
   const has = (kind) => told.some((job) => kindOf(effectiveStatus(job)) === kind);
   if (has('failed')) return 'failed';
   if (has('running')) return 'running';
@@ -59,7 +53,8 @@ export function stageStatus(jobs) {
   if (has('scheduled')) return 'scheduled';
   if (has('warning')) return 'warning';
   if (has('canceled')) return 'canceled';
-  return 'success';
+  // Skipped jobs beside passed ones are a stage that passed; skipped alone is skipped.
+  return told.every((job) => kindOf(effectiveStatus(job)) === 'skipped') ? 'skipped' : 'success';
 }
 
 /**

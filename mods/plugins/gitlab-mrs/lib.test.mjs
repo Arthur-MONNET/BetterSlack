@@ -94,10 +94,11 @@ test('a job waiting for a person does not colour its stage when there is anythin
   assert.equal(s('created', 'manual'), 'created');
   const allowed = [J(1, 'x', 'flaky', 'failed', { allow_failure: true }), J(2, 'x', 'ok', 'success'), J(3, 'x', 'deploy', 'manual')];
   assert.equal(stageStatus(allowed), 'warning');
-  // Jobs that did not run say nothing either: a manual deploy beside them is what the stage is about.
-  assert.equal(s('skipped', 'manual'), 'manual');
+  // Jobs that did not run are the other jobs' state like any other: skipped beside a manual one is skipped.
+  assert.equal(s('skipped', 'manual'), 'skipped');
+  assert.equal(s('skipped', 'skipped', 'manual'), 'skipped');
   assert.equal(s('skipped', 'skipped'), 'skipped');
-  assert.equal(s('success', 'skipped', 'manual'), 'success');
+  assert.equal(s('success', 'skipped', 'manual'), 'success', 'and beside a passed one, passed');
 });
 
 test('a manual job is grey, like GitLab draws it, and not the warning colour', () => {
