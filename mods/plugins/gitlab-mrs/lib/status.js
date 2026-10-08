@@ -9,7 +9,8 @@
 // arc, an empty ring, a play triangle, a slash, a skip mark, a clock.
 //
 // `manual` is deliberately not "running": the pipeline is waiting for a person,
-// and nothing is happening. `skipped` and `canceled` are not failures either.
+// and nothing is happening -- so it is grey, as GitLab draws it, and not a
+// warning. `skipped` and `canceled` are not failures either.
 
 /**
  * Statuses of a pipeline that is still going to do something by itself.
@@ -48,8 +49,7 @@ export function toneOf(status) {
     case 'success': return 'success';
     case 'failed': return 'danger';
     case 'running': return 'info';
-    case 'warning':
-    case 'manual': return 'warning';
+    case 'warning': return 'warning';
     default: return 'muted';
   }
 }

@@ -24,7 +24,7 @@ test('every GitLab status has a kind, a tone and a shape of its own', () => {
     assert.match(iconOf(status), /^<svg /, status);
   }
   const expected = { success: 'success', failed: 'danger', running: 'info', pending: 'muted',
-    canceled: 'muted', skipped: 'muted', manual: 'warning', scheduled: 'muted' };
+    canceled: 'muted', skipped: 'muted', manual: 'muted', scheduled: 'muted' };
   for (const [status, tone] of Object.entries(expected)) assert.equal(toneOf(status), tone, status);
 });
 
@@ -73,11 +73,38 @@ test('a stage is as bad as its worst job, then as busy as its busiest', () => {
   assert.equal(s('success', 'running'), 'running');
   assert.equal(s('failed', 'running'), 'failed', 'a failure is not hidden behind work still going');
   assert.equal(s('success', 'pending'), 'pending');
-  assert.equal(s('success', 'manual'), 'manual');
+  assert.equal(s('manual', 'manual'), 'manual', 'only manual jobs: the stage waits for a person');
   assert.equal(s('skipped', 'skipped'), 'skipped');
   assert.equal(s('success', 'skipped'), 'success');
   assert.equal(s('canceled', 'success'), 'canceled');
   assert.equal(s('created', 'created'), 'created');
+});
+
+test('a job waiting for a person does not colour its stage when there is anything else in it', () => {
+  const s = (...statuses) => stageStatus(statuses.map((status, i) => J(i + 1, 'x', `j${i}`, status)));
+  // The other jobs' state is what the stage shows.
+  assert.equal(s('success', 'success', 'manual'), 'success');
+  assert.equal(s('manual', 'success'), 'success');
+  assert.equal(s('canceled', 'manual'), 'canceled');
+  // A failure, a failure that is allowed, and work still going still show, as before.
+  assert.equal(s('failed', 'manual'), 'failed');
+  assert.equal(s('failed', 'success', 'manual'), 'failed');
+  assert.equal(s('running', 'success', 'manual'), 'running');
+  assert.equal(s('pending', 'manual'), 'pending');
+  assert.equal(s('created', 'manual'), 'created');
+  const allowed = [J(1, 'x', 'flaky', 'failed', { allow_failure: true }), J(2, 'x', 'ok', 'success'), J(3, 'x', 'deploy', 'manual')];
+  assert.equal(stageStatus(allowed), 'warning');
+  // Jobs that did not run say nothing either: a manual deploy beside them is what the stage is about.
+  assert.equal(s('skipped', 'manual'), 'manual');
+  assert.equal(s('skipped', 'skipped'), 'skipped');
+  assert.equal(s('success', 'skipped', 'manual'), 'success');
+});
+
+test('a manual job is grey, like GitLab draws it, and not the warning colour', () => {
+  assert.equal(toneOf('manual'), 'muted');
+  assert.notEqual(toneOf('manual'), toneOf('warning'));
+  const shapes = new Set(['manual', 'canceled', 'skipped', 'created'].map(iconOf));
+  assert.equal(shapes.size, 4, 'grey, but still its own shape');
 });
 
 test('a failure the pipeline allows is a warning, and does not turn its stage red', () => {

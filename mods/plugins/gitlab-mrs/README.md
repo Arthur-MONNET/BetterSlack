@@ -21,7 +21,7 @@ Your username comes from GitLab — nothing about it is configured.
 
 `7/12` is jobs finished out of jobs that will run on their own. **Finished** means passed, failed (including a failure the pipeline allows) or canceled. **Manual** and **skipped** jobs are in neither number — a manual deploy would otherwise keep a pipeline from ever reading 12/12, and counting it as done would be untrue — and the count of manual jobs is said beside it. The row of stages is the information; the ratio is a summary.
 
-A stage is as bad as its worst job: a failure shows at once, even while the rest of the stage is still running. A failed job its pipeline allows to fail shows as a warning, not as a failure.
+A stage is as bad as its worst job: a failure shows at once, even while the rest of the stage is still running. A failed job its pipeline allows to fail shows as a warning, not as a failure. A job waiting for a person is grey, and does not colour its stage: a stage of passed jobs and a manual deploy reads as passed, and is grey only when nothing else is in it.
 
 ## Where the token is, and what is sent
 

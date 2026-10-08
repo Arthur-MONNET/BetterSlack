@@ -21,7 +21,7 @@ Votre nom d’utilisateur vient de GitLab — rien à son sujet n’est à confi
 
 `7/12` est le nombre de jobs terminés sur ceux qui s’exécuteront d’eux-mêmes. **Terminé** veut dire réussi, échoué (y compris un échec que la pipeline autorise) ou annulé. Les jobs **manuels** et **ignorés** ne sont dans aucun des deux nombres — un déploiement manuel empêcherait sinon une pipeline d’afficher 12/12, et le compter comme fait serait faux — et le nombre de jobs manuels est dit à côté. La rangée d’étapes est l’information ; le ratio n’est qu’un résumé.
 
-Une étape est aussi mauvaise que son pire job : un échec se voit tout de suite, même si le reste de l’étape tourne encore. Un job échoué que la pipeline autorise à échouer s’affiche en avertissement, pas en échec.
+Une étape est aussi mauvaise que son pire job : un échec se voit tout de suite, même si le reste de l’étape tourne encore. Un job échoué que la pipeline autorise à échouer s’affiche en avertissement, pas en échec. Un job en attente d’une personne est gris et ne colore pas son étape : une étape de jobs réussis et d’un déploiement manuel s’affiche comme réussie, et n’est grise que s’il n’y a rien d’autre dedans.
 
 ## Où est le jeton, et ce qui est envoyé
 

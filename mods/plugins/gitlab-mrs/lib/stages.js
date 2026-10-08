@@ -34,19 +34,32 @@ export const effectiveStatus = (job) => (job.status === 'failed' && job.allowFai
  * A failure outranks everything: somebody watching a stage that is half failed
  * and half running wants the failure, now, not when the rest has finished.
  * After that, what is happening, then what is waiting, then what is over.
+ *
+ * A job waiting for a person says nothing about how the stage went, and neither
+ * does one that did not run. They are left out of the answer whenever anything
+ * else is in the stage, so a stage of passed jobs and a manual deploy reads as
+ * passed. Only when nothing else is there does the stage say `manual` -- and a
+ * failure, a failure the pipeline allows, or work still going still shows,
+ * because those are in the other jobs.
  */
 export function stageStatus(jobs) {
   const kinds = jobs.map((job) => kindOf(effectiveStatus(job)));
-  const has = (kind) => kinds.includes(kind);
+  const told = jobs.filter((job) => {
+    const kind = kindOf(effectiveStatus(job));
+    return kind !== 'manual' && kind !== 'skipped';
+  });
+  if (told.length === 0) {
+    if (kinds.includes('manual')) return 'manual';
+    return kinds.length > 0 ? 'skipped' : 'created';
+  }
+  const has = (kind) => told.some((job) => kindOf(effectiveStatus(job)) === kind);
   if (has('failed')) return 'failed';
   if (has('running')) return 'running';
-  if (has('pending')) return jobs.some((job) => job.status === 'pending') ? 'pending' : 'created';
+  if (has('pending')) return told.some((job) => job.status === 'pending') ? 'pending' : 'created';
   if (has('scheduled')) return 'scheduled';
-  if (has('manual')) return 'manual';
   if (has('warning')) return 'warning';
   if (has('canceled')) return 'canceled';
-  if (kinds.length > 0 && kinds.every((kind) => kind === 'skipped')) return 'skipped';
-  return kinds.length > 0 ? 'success' : 'created';
+  return 'success';
 }
 
 /**
