@@ -1320,6 +1320,9 @@
  * for the reason the search box's is: Slack's stylesheet loads after this one.
  */
 .betterslack-settings__row--wide { flex-direction: column; align-items: stretch; gap: 8px; }
+/* The label's 260px basis is a width in a row and a height in a column, where
+   it opened a gap that tall between the hint and the box. */
+.betterslack-settings__row--wide > * { flex: 0 0 auto; }
 .betterslack-settings__row--wide > .betterslack-row__actions { width: 100%; }
 .betterslack-settings__text { display: flex; flex-direction: column; gap: 6px; width: 100%; }
 .betterslack-settings__textarea.betterslack-settings__textarea,
