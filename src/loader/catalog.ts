@@ -40,8 +40,8 @@ function assertString(value: unknown, field: string, file: string): string {
   return value;
 }
 
-/** The five field types the panel can draw, validated before it has to. */
-const FIELD_TYPES = new Set(['boolean', 'number', 'text', 'colour', 'choice']);
+/** The six field types the panel can draw, validated before it has to. */
+const FIELD_TYPES = new Set(['boolean', 'number', 'text', 'textarea', 'colour', 'choice']);
 
 /**
  * Settings a mod declares.
@@ -166,6 +166,30 @@ function parseNetwork(
   };
 }
 
+/**
+ * Which setting holds the lines the start screen may show.
+ *
+ * Has to be a `textarea` of the same mod: the start screen reads it a line at a
+ * time, and a setting the panel does not draw as one is a list the user cannot
+ * see to change.
+ */
+function parseSplash(
+  value: unknown,
+  settings: ModSettingField[] | undefined,
+  file: string,
+): ModManifest['splash'] {
+  if (value === undefined) return undefined;
+  const key = (value as { setting?: unknown } | null)?.setting;
+  if (typeof key !== 'string') {
+    throw new ManifestError(file, '"splash" must be { "setting": "<key>" }');
+  }
+  const field = settings?.find((candidate) => candidate.key === key);
+  if (!field || field.type !== 'textarea') {
+    throw new ManifestError(file, `"splash" names ${JSON.stringify(key)}, which is not a textarea setting of this mod`);
+  }
+  return { setting: key };
+}
+
 export function parseManifest(raw: string, file: string, expectedType: ModType): ModManifest {
   let data: unknown;
   try {
@@ -218,6 +242,10 @@ export function parseManifest(raw: string, file: string, expectedType: ModType):
 
   const settings = parseSettings(m.settings, file);
   const network = parseNetwork(m.network, expectedType, settings, file);
+  const splash = parseSplash(m.splash, settings, file);
+  if (m.defaultEnabled !== undefined && typeof m.defaultEnabled !== 'boolean') {
+    throw new ManifestError(file, '"defaultEnabled" must be true or false');
+  }
 
   const api = typeof m.betterslackApi === 'number' ? m.betterslackApi : 0;
   if (api < 1) throw new ManifestError(file, '"betterslackApi" is missing or below 1');
@@ -287,6 +315,8 @@ export function parseManifest(raw: string, file: string, expectedType: ModType):
     requires,
     settings,
     network,
+    splash,
+    defaultEnabled: m.defaultEnabled === true ? true : undefined,
     betterslackApi: api,
     slackVersion: typeof m.slackVersion === 'string' ? m.slackVersion : undefined,
     needsBetterSlack: typeof m.needsBetterSlack === 'string' ? m.needsBetterSlack : undefined,
@@ -397,8 +427,22 @@ export class Catalog {
     // that already shipped without editing the checked-in files.
     for (const record of builtin.mods) this.records.set(record.id, { record, root: this.builtinRoot });
     for (const record of user.mods) this.records.set(record.id, { record, root: this.userRoot });
+    this.defaults = builtin.mods.filter((record) => record.defaultEnabled === true).map((record) => record.id);
     return this.list();
   }
+
+  /**
+   * The catalogue mods marked `defaultEnabled`.
+   *
+   * Read off the repository's own folder rather than the merged list: a copy
+   * under the user's home shadows the shipped one, and does not get to decide
+   * whether it is a default -- nor to make itself one.
+   */
+  defaultIds(): string[] {
+    return [...this.defaults];
+  }
+
+  private defaults: string[] = [];
 
   list(): ModRecord[] {
     return [...this.records.values()]

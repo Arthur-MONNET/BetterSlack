@@ -86,6 +86,15 @@ whether one is held, and `clearCredential()` is signing out. Review checks that
 the field is emptied once sent and that nothing about the token is logged, shown
 in an error or written to a setting.
 
+## On by default
+
+A catalogue mod whose manifest says `"defaultEnabled": true` is installed and
+switched on for every user, once: at the first start of a fresh install, and
+at the first start after an update that brings it. Somebody who then switches
+it off keeps it off. It is the maintainers' call, not a contributor's -- a pull
+request that sets it is asking to run its code in everybody's Slack, so say
+why in the description.
+
 ## Text a user reads
 
 Every plugin here ships **English and French**, through `api.i18n.strings()`.

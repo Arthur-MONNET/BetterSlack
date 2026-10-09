@@ -42,6 +42,10 @@ export const PANEL_STRINGS = {
     notRunning: 'not running',
     settingsCount: 'Settings ({count})',
     settingsHide: 'Hide settings',
+    textLines: '{count} line(s)',
+    textExpand: 'Expand',
+    textSave: 'Save',
+    textRestore: 'Restore the original',
 
     uses: 'Uses {names}',
     needs: 'Needs {names}',
@@ -212,6 +216,10 @@ export const PANEL_STRINGS = {
     notRunning: 'n’a pas démarré',
     settingsCount: 'Réglages ({count})',
     settingsHide: 'Masquer les réglages',
+    textLines: '{count} ligne(s)',
+    textExpand: 'Agrandir',
+    textSave: 'Enregistrer',
+    textRestore: 'Rétablir le texte d’origine',
 
     uses: 'Utilise {names}',
     needs: 'Nécessite {names}',
