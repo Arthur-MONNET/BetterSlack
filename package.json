@@ -1,6 +1,6 @@
 {
   "name": "betterslack",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "private": false,
   "description": "Themes, plugins and mods for the Slack desktop app",
   "type": "module",
