@@ -470,11 +470,11 @@ window.CATALOGUE = {
     {
       "id": "splash-lines",
       "name": "Splash Lines",
-      "description": "A line on the start screen, the way Minecraft has one: every time Slack starts, BetterSlack's loading screen shows a sentence picked at random from a list you can edit. It ships with a hundred about the office's own running jokes -- releases, payments, AB tests and JL's sign-off.",
+      "description": "A line on the start screen, the way Minecraft has one: every time Slack starts, BetterSlack's loading screen shows a sentence picked at random from a list you can edit. It ships with more than three hundred and fifty about the office's own running jokes -- releases, payments, AB tests and JL's sign-off.",
       "descriptions": {
-        "fr": "Une phrase sur l’écran de chargement, comme dans Minecraft : à chaque démarrage de Slack, l’écran de BetterSlack affiche une phrase tirée au hasard dans une liste que vous pouvez modifier. Livré avec une centaine de phrases sur les running gags de la boîte — les MEP, le paiement, les AB tests et la validation de JL."
+        "fr": "Une phrase sur l’écran de chargement, comme dans Minecraft : à chaque démarrage de Slack, l’écran de BetterSlack affiche une phrase tirée au hasard dans une liste que vous pouvez modifier. Livré avec plus de 350 phrases sur les running gags de la boîte — les MEP, le paiement, les AB tests et la validation de JL."
       },
-      "version": "1.0.0",
+      "version": "1.1.0",
       "tags": [
         "appearance",
         "fun"
