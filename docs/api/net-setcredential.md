@@ -13,6 +13,8 @@ Hand the loader the secret a server wants in a header -- a GitLab token -- so `a
 
 It is write-only: nothing answers with the secret, not this call, not `hasCredential`, not an error. Code that later rewrites the address setting to somewhere else makes the loader send nothing, rather than the token. It is kept in a file of its own under `~/.betterslack/credentials/`, readable by the user only -- not in `settings.json`, which every backup, every window and every page-start script carries -- and a plain file all the same, to be protected like the token it holds. Removing the mod deletes it.
 
+What this does not do is make the page a sandbox. Every plugin shares it, and the loader is told which mod a request is for by the message the page sends, so another plugin that talks to the loader directly can ask for a request to be made *as this one* -- and read the answer -- or replace the secret. What it can never do is read the token. That is the same review contract as the address (see `api.net.request`), and it is why a mod that holds a token is read before it is merged.
+
 ```js
 // mod.json: "network": { "settings": ["gitUrl"], "credential": { "header": "PRIVATE-TOKEN" } }
 const base = api.settings.get('gitUrl');

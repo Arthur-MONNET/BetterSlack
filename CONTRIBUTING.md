@@ -82,7 +82,9 @@ tokenField.value = '';
 
 `{ "header": "Authorization", "prefix": "Bearer " }` is the other common shape.
 There is no call that reads the secret back; `hasCredential()` says only
-whether one is held, and `clearCredential()` is signing out. Review checks that
+whether one is held, and `clearCredential()` is signing out. Another plugin in
+the page cannot read your token, but it can ask the loader to make a request as
+your mod, so the review is the protection and not a sandbox. Review checks that
 the field is emptied once sent and that nothing about the token is logged, shown
 in an error or written to a setting.
 

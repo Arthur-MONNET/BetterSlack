@@ -847,6 +847,14 @@ tests fail below it.
     it. It is a plain file, not a keychain entry, and is not described as
     encrypted anywhere.
   - **No redirect carries it**, since none is followed.
+
+  What it is *not* is isolation between plugins. The loader is told which mod a
+  `net.request` or `net.credential` is for by the message the page sends, and
+  every plugin shares the page and its bridge binding, so a plugin that talks to
+  the bridge directly can have a request made as another mod -- answer included
+  -- or replace its secret. It can never read the token. That is the review
+  contract `api.net` already is, with a secret attached, and the reason a mod
+  holding one is read before it merges.
   `src/loader/net-credentials.ts` is the file; `tests/net-credentials.test.mjs`
   holds the negative properties.
 - **At a cold start the URL names a workspace the client is not showing.**
