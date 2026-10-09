@@ -57,6 +57,37 @@ export interface ModManifest {
   network?: { settings: string[] };
 
   /**
+   * Catalogue mods only: installed and switched on for everybody, once.
+   *
+   * The repository is a catalogue and a fresh install starts empty -- except
+   * for what is marked here. The loader checks at every start for a marked mod
+   * it has never offered this person (`Settings.seeded`), installs it, switches
+   * it on and writes it down, so a first install and an update that brings a
+   * new marked mod both end with it running. Written down rather than
+   * re-applied: somebody who then switches it off has said so, and the next
+   * start does not switch it back on.
+   *
+   * Honoured for `builtin` mods only. A folder somebody else wrote does not get
+   * to turn itself on.
+   */
+  defaultEnabled?: boolean;
+
+  /**
+   * Which of its settings holds lines the start screen may show.
+   *
+   * The start screen is up from the first frame, long before any plugin has
+   * run, so a mod cannot put words on it by calling something -- by the time
+   * it could, the screen is coming down. It names a setting instead, and the
+   * runtime reads that setting's value (or its default) out of the boot
+   * payload: one line of it, at random, under the mark. Every enabled mod
+   * that names one is pooled.
+   *
+   * The key must be a declared `textarea` setting: one line per entry is the
+   * shape, and the panel is where the user edits it.
+   */
+  splash?: { setting: string };
+
+  /**
    * A square mark for the mod, as a file in its folder -- `icon.svg`.
    *
    * SVG rather than a bitmap: it is drawn at four sizes between the panel's
@@ -193,6 +224,19 @@ export type ModSettingField = Localised & (
     cssVar?: string;
   }
   | { key: string; type: 'colour'; label: string; hint?: string; default?: string; cssVar?: string }
+  /*
+   * Several lines of text. Drawn as a textarea under its label rather than
+   * beside it, with a button that opens the same text in a dialog -- a list of
+   * a hundred lines is not edited through a box six lines tall.
+   */
+  | {
+    key: string;
+    type: 'textarea';
+    label: string;
+    hint?: string;
+    default?: string;
+    placeholder?: string;
+  }
   | {
     key: string;
     type: 'choice';
@@ -279,8 +323,9 @@ export const SLACK_PREFS: readonly SlackPref[] = [
 export interface Settings {
   /**
    * Mod ids the user has installed. The repository is a catalogue, not a set of
-   * pre-installed mods: a fresh install starts empty and you install what you
-   * want. `enabled` is always a subset of this.
+   * pre-installed mods: a fresh install starts with only the mods marked
+   * `defaultEnabled` and you install what you want. `enabled` is always a
+   * subset of this.
    */
   installed: string[];
   /** Mod ids that are currently on. */
@@ -336,6 +381,15 @@ export interface Settings {
    * offers it again for anyone who said later.
    */
   dockIconAsked?: boolean;
+  /**
+   * Catalogue mods marked `defaultEnabled` that have already been installed
+   * and switched on for this person, once.
+   *
+   * What makes "on by default" a default rather than a rule: a mod in here is
+   * never switched on again by the loader, so switching it off or removing it
+   * holds across every later start and update.
+   */
+  seeded?: string[];
 }
 
 /** Whether Slack's Dock tile wears BetterSlack's icon, as `app.dockIcon` answers. */

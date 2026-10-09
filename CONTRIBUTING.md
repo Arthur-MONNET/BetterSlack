@@ -65,6 +65,15 @@ not a sandbox, since every plugin shares the page. Say in the pull request what
 the server is and exactly what is sent to it -- and never anything that came
 from Slack.
 
+## On by default
+
+A catalogue mod whose manifest says `"defaultEnabled": true` is installed and
+switched on for every user, once: at the first start of a fresh install, and
+at the first start after an update that brings it. Somebody who then switches
+it off keeps it off. It is the maintainers' call, not a contributor's -- a pull
+request that sets it is asking to run its code in everybody's Slack, so say
+why in the description.
+
 ## Text a user reads
 
 Every plugin here ships **English and French**, through `api.i18n.strings()`.

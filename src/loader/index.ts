@@ -41,6 +41,7 @@ import {
   readSettings,
   setModEnabled,
   setModInstalled,
+  seedDefaultMods,
   USER_MODS_ROOT,
 } from './store.js';
 import {
@@ -187,6 +188,19 @@ class Loader {
     await ensureUserRoot();
     await this.catalog.refresh();
     for (const problem of this.catalog.errors) console.warn(`[betterslack] skipped mod - ${problem}`);
+
+    /*
+     * The catalogue's defaults, before anything reads the settings for the
+     * bootstrap -- so a first start, and the first start after an update that
+     * brought one, already has it running. Once per person: `seedDefaultMods`
+     * remembers what it has offered, and leaves alone anything switched off.
+     * Builtin only: a folder from somewhere else does not get to switch itself on.
+     */
+    const seeded = await seedDefaultMods(this.catalog.defaultIds()).catch((err) => {
+      console.warn(`[betterslack] could not switch on the default mods: ${err}`);
+      return null;
+    });
+    if (seeded?.added.length) console.log(`[betterslack] switched on by default: ${seeded.added.join(', ')}`);
 
     this.info = {
       version: VERSION,

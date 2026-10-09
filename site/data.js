@@ -468,6 +468,22 @@ window.CATALOGUE = {
       "settings": 0
     },
     {
+      "id": "splash-lines",
+      "name": "Splash Lines",
+      "description": "A line on the start screen, the way Minecraft has one: every time Slack starts, BetterSlack's loading screen shows a sentence picked at random from a list you can edit. It ships with a hundred about the office's own running jokes -- releases, payments, AB tests and JL's sign-off.",
+      "descriptions": {
+        "fr": "Une phrase sur l’écran de chargement, comme dans Minecraft : à chaque démarrage de Slack, l’écran de BetterSlack affiche une phrase tirée au hasard dans une liste que vous pouvez modifier. Livré avec une centaine de phrases sur les running gags de la boîte — les MEP, le paiement, les AB tests et la validation de JL."
+      },
+      "version": "1.0.0",
+      "tags": [
+        "appearance",
+        "fun"
+      ],
+      "requires": [],
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" role=\"img\" aria-hidden=\"true\"><path d=\"M12 2.5l2.1 4.6 5-.9-2.6 4.4 3.9 3.2-5 .8.2 5.1L12 16.8l-3.6 2.9.2-5.1-5-.8 3.9-3.2-2.6-4.4 5 .9z\" fill=\"#facc15\"/><path d=\"M9.5 11.5h5M10.5 13.5h3\" stroke=\"#1a1d21\" stroke-width=\"1.4\" stroke-linecap=\"round\"/></svg>",
+      "settings": 1
+    },
+    {
       "id": "theme-builder",
       "name": "Theme Builder",
       "description": "A theme workbench in its own window, with the real Slack beside it as the preview: two colours become twelve roles across all four token families, point at anything in the app to see and edit the tokens that paint it, search every colour the client defines, and add CSS of your own on top.",

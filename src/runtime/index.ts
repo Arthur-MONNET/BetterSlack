@@ -6,7 +6,7 @@
 import { ModManager, type BootPayload } from './manager.js';
 import { Bridge } from './rpc.js';
 import { installLauncher } from './ui/launcher.js';
-import { showSplash, splashVarsFrom } from './ui/splash.js';
+import { showSplash, splashLineFrom, splashVarsFrom } from './ui/splash.js';
 import { LAUNCHER_CSS, PANEL_CSS } from './ui/styles.js';
 import { Panel } from './ui/panel.js';
 import { offerDockIcon } from './ui/dock-icon.js';
@@ -114,6 +114,9 @@ async function boot(): Promise<void> {
     bridge.request<string>({ type: 'app.art' }).catch(() => null),
     // Safe mode applies no theme, so its start screen wears none either.
     payload.info.safeMode ? '' : splashVarsFrom(payload),
+    // A line a switched-on mod keeps for this screen. Safe mode runs no mod, so
+    // it shows none of theirs either.
+    payload.info.safeMode ? '' : splashLineFrom(payload),
   );
 
   /*

@@ -94,10 +94,17 @@ const SORTS: Record<ShelfId, SortId[]> = {
   installed: ['recent', 'az', 'za', 'enabled'],
 };
 
+/** The lines a text setting holds, as its counter shows them: blank ones are not lines. */
+function countLines(text: string): number {
+  return text.split('\n').filter((line) => line.trim()).length;
+}
+
 const HOST_ID = 'betterslack-panel';
 /** The shared menu's layer, so Escape can tell it apart from the panel. */
 const MENU_ID = 'betterslack-menu-layer';
 const REQUIRES_ID = 'betterslack-requires';
+/** The dialog a long text setting opens into, so Escape can close it first. */
+const EDITOR_ID = 'betterslack-text-editor';
 
 const CLOSE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true" style="--s:20px">
   <path fill="currentColor" d="M5.72 5.72a.75.75 0 0 1 1.06 0L10 8.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L11.06 10l3.22 3.22a.75.75 0 1 1-1.06 1.06L10 11.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L8.94 10 5.72 6.78a.75.75 0 0 1 0-1.06Z"/>
@@ -234,6 +241,7 @@ export class Panel {
 
   close(): void {
     this.closeMenu();
+    this.dismissEditor?.();
     this.dismissRequires?.();
     this.host?.remove();
     this.host = null;
@@ -245,7 +253,8 @@ export class Panel {
     event.stopPropagation();
     // Innermost first: Escape should dismiss the consent dialog without also
     // closing the panel behind it.
-    if (document.getElementById(REQUIRES_ID)) this.dismissRequires?.();
+    if (document.getElementById(EDITOR_ID)) this.dismissEditor?.();
+    else if (document.getElementById(REQUIRES_ID)) this.dismissRequires?.();
     else if (document.getElementById(MENU_ID)) this.closeMenu();
     else this.close();
   };
@@ -949,6 +958,42 @@ export class Panel {
           control.setAttribute('aria-label', localised(field.label, field.labels, language()));
           break;
         }
+        case 'textarea': {
+          const title = localised(field.label, field.labels, language());
+          const text = typeof current === 'string' ? current : '';
+          const area = h('textarea', {
+            class: 'c-input_text betterslack-search betterslack-settings__textarea',
+            rows: '8',
+            spellcheck: 'false',
+            'aria-label': title,
+            ...(field.placeholder ? { placeholder: field.placeholder } : {}),
+          }) as HTMLTextAreaElement;
+          area.value = text;
+          // On change, not on input: every write reloads the mod, and a keystroke
+          // is not a decision.
+          area.addEventListener('change', () => write(area.value));
+          const count = h('span', { class: 'betterslack-settings__count' }, [
+            t('textLines', { count: countLines(text) }),
+          ]);
+          area.addEventListener('input', () => {
+            count.textContent = t('textLines', { count: countLines(area.value) });
+          });
+          const expand = h('button', {
+            class: 'c-button c-button--outline c-button--small',
+            type: 'button',
+          }, [t('textExpand')]);
+          expand.addEventListener('click', () => {
+            this.openTextEditor(title, area.value, field.default ?? '', (value) => {
+              area.value = value;
+              write(value);
+            });
+          });
+          control = h('div', { class: 'betterslack-settings__text' }, [
+            area,
+            h('div', { class: 'betterslack-settings__textbar' }, [count, expand]),
+          ]);
+          break;
+        }
         default: {
           const input = h('input', {
             type: 'text',
@@ -972,7 +1017,13 @@ export class Panel {
       const label = localised(field.label, field.labels, language());
       const hint = field.hint ? localised(field.hint, field.hints, language()) : null;
 
-      box.append(h('div', { class: 'betterslack-settings__row' }, [
+      box.append(h('div', {
+        // A block of text takes the row's whole width, under its label: beside
+        // it, a list of a hundred lines would be a column a few words wide.
+        class: field.type === 'textarea'
+          ? 'betterslack-settings__row betterslack-settings__row--wide'
+          : 'betterslack-settings__row',
+      }, [
         h('div', { class: 'betterslack-settings__meta' }, [
           h('div', { class: 'betterslack-row__name' }, [label]),
           hint ? h('div', { class: 'betterslack-row__desc' }, [hint]) : null,
@@ -1028,6 +1079,95 @@ export class Panel {
 
   /** Set while the requirements dialog is open, so Escape can cancel it. */
   private dismissRequires: (() => void) | null = null;
+
+  /** Set while a long text setting is open in its own dialog. */
+  private dismissEditor: (() => void) | null = null;
+
+  /**
+   * A text setting, given the room it needs.
+   *
+   * Nothing is written until Save: the box in the row writes on every change,
+   * and a dialog is where somebody reworks a whole list and may change their
+   * mind about all of it. Escape and the backdrop cancel; Cmd or Ctrl+Enter
+   * saves. "Restore the original" refills the box with the manifest's text and
+   * still waits for Save.
+   */
+  private openTextEditor(title: string, value: string, original: string, save: (value: string) => void): void {
+    this.dismissEditor?.();
+
+    const finish = (keep: boolean) => {
+      this.dismissEditor = null;
+      document.getElementById(EDITOR_ID)?.remove();
+      if (keep) save(area.value);
+    };
+    this.dismissEditor = () => finish(false);
+
+    const area = h('textarea', {
+      class: 'c-input_text betterslack-search betterslack-editor__area',
+      spellcheck: 'false',
+      'aria-label': title,
+    }) as HTMLTextAreaElement;
+    area.value = value;
+    const count = h('span', { class: 'betterslack-settings__count' }, [
+      t('textLines', { count: countLines(value) }),
+    ]);
+    area.addEventListener('input', () => {
+      count.textContent = t('textLines', { count: countLines(area.value) });
+    });
+    area.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        finish(true);
+      }
+    });
+
+    const restore = h('button', {
+      class: 'c-button-unstyled betterslack-row__review',
+      type: 'button',
+    }, [t('textRestore')]);
+    restore.addEventListener('click', () => {
+      area.value = original;
+      count.textContent = t('textLines', { count: countLines(original) });
+      area.focus();
+    });
+    const cancel = h('button', {
+      class: 'c-button c-button--outline c-button--medium',
+      type: 'button',
+    }, [t('cancel')]);
+    cancel.addEventListener('click', () => finish(false));
+    const accept = h('button', {
+      class: 'c-button c-button--primary c-button--medium',
+      type: 'button',
+    }, [t('textSave')]);
+    accept.addEventListener('click', () => finish(true));
+
+    const layer = h('div', { id: EDITOR_ID, class: 'c-dialog betterslack-dialog' }, [
+      h('div', {
+        class: 'c-dialog__content betterslack-content betterslack-content--editor',
+        role: 'dialog',
+        'aria-modal': 'true',
+        'aria-label': title,
+      }, [
+        h('div', { class: 'c-dialog__header betterslack-header' }, [
+          h('h1', { class: 'c-dialog__title' }, [title]),
+        ]),
+        h('div', { class: 'c-dialog__body betterslack-body betterslack-editor' }, [area]),
+        h('div', { class: 'betterslack-actions betterslack-actions--dialog betterslack-editor__actions' }, [
+          count,
+          original ? restore : null,
+          h('span', { class: 'betterslack-editor__spacer' }),
+          cancel,
+          accept,
+        ].filter(Boolean) as Node[]),
+      ]),
+    ]);
+
+    document.body.append(layer);
+    layer.addEventListener('mousedown', (event) => {
+      if (event.target === layer) finish(false);
+    });
+    queueMicrotask(() => area.focus());
+  }
 
   /**
    * Ask before switching on a theme's required plugins.

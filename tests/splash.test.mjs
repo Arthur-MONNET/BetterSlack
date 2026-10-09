@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
-import { showSplash } from '../dist/ui/splash.mjs';
+import { showSplash, splashLineFrom, splashLinesFrom } from '../dist/ui/splash.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => readFileSync(path.join(root, rel), 'utf8');
@@ -251,4 +251,54 @@ test('a theme\'s start screen is on the very first frame, read from the boot pay
     assert.equal(root.querySelector('video'), null, 'and the default animation never goes in');
     splash.done();
   });
+});
+
+/** The slice of the boot payload a mod's start-screen lines are read from. */
+const payloadWith = ({ enabled = ['lines-mod'], saved } = {}) => ({
+  settings: {
+    enabled,
+    modSettings: saved === undefined ? {} : { 'lines-mod': { lines: saved } },
+  },
+  mods: [{
+    id: 'lines-mod',
+    splash: { setting: 'lines' },
+    settings: [{ key: 'lines', type: 'textarea', default: '# Shipped\nfrom the manifest\n' }],
+  }, { id: 'other', settings: [{ key: 'lines', default: 'not named by a splash field' }] }],
+});
+
+test("a mod's lines come from its setting, or from its manifest until somebody edits it", () => {
+  assert.deepEqual(splashLinesFrom(payloadWith()), ['from the manifest']);
+  assert.deepEqual(splashLinesFrom(payloadWith({ saved: 'one\n\n  two  \n# a heading' })), ['one', 'two']);
+  assert.deepEqual(splashLinesFrom(payloadWith({ saved: '' })), [], 'an emptied list stays empty');
+  assert.deepEqual(splashLinesFrom(payloadWith({ enabled: [] })), [], 'a mod that is off says nothing');
+  assert.equal(splashLineFrom(payloadWith({ saved: 'a\nb\nc' }), () => 0.5), 'b');
+  assert.equal(splashLineFrom(payloadWith({ saved: 'a\nb\nc' }), () => 1), 'c', 'never past the end');
+  assert.equal(splashLineFrom({ settings: null, mods: [] }), '', 'a payload it cannot read costs nothing');
+});
+
+test('the line is on the screen, between the mark and the progress', async () => {
+  await withDom('<!doctype html><html><head></head><body></body></html>', async (dom) => {
+    const splash = showSplash(undefined, '', 'Vu avec JL. Revu avec JL.');
+    const root = hostIn(dom).shadowRoot;
+    const line = root.querySelector('.line');
+    assert.equal(line?.textContent, 'Vu avec JL. Revu avec JL.');
+    assert.ok(line.previousElementSibling.classList.contains('stage'), 'under the mark');
+    assert.ok(line.nextElementSibling.classList.contains('label'), 'above the progress');
+    splash.done();
+    await wait(EXIT_MS);
+  });
+});
+
+test('no line, no empty box', async () => {
+  await withDom('<!doctype html><html><head></head><body></body></html>', async (dom) => {
+    const splash = showSplash();
+    assert.equal(hostIn(dom).shadowRoot.querySelector('.line'), null);
+    splash.done();
+    await wait(EXIT_MS);
+  });
+});
+
+test('the boot wires the line in, and safe mode shows none', () => {
+  const source = read('src/runtime/index.ts');
+  assert.match(source, /payload\.info\.safeMode \? '' : splashLineFrom\(payload\)/);
 });

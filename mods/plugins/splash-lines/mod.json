@@ -1,0 +1,42 @@
+{
+  "id": "splash-lines",
+  "name": "Splash Lines",
+  "type": "plugin",
+  "version": "1.0.0",
+  "author": "AirOne-dev",
+  "description": "A line on the start screen, the way Minecraft has one: every time Slack starts, BetterSlack's loading screen shows a sentence picked at random from a list you can edit. It ships with a hundred about the office's own running jokes -- releases, payments, AB tests and JL's sign-off.",
+  "descriptions": {
+    "fr": "Une phrase sur l’écran de chargement, comme dans Minecraft : à chaque démarrage de Slack, l’écran de BetterSlack affiche une phrase tirée au hasard dans une liste que vous pouvez modifier. Livré avec une centaine de phrases sur les running gags de la boîte — les MEP, le paiement, les AB tests et la validation de JL."
+  },
+  "entry": "index.js",
+  "icon": "icon.svg",
+  "defaultEnabled": true,
+  "splash": {
+    "setting": "lines"
+  },
+  "settings": [
+    {
+      "key": "lines",
+      "type": "textarea",
+      "label": "Lines",
+      "hint": "One per line, one picked at random at every start. Blank lines and lines starting with # are skipped, so the list can be kept in sections.",
+      "labels": {
+        "fr": "Phrases"
+      },
+      "hints": {
+        "fr": "Une par ligne, une tirée au hasard à chaque démarrage. Les lignes vides et celles qui commencent par # sont ignorées, ce qui permet de ranger la liste en sections."
+      },
+      "default": "# MEP & prod\nMEP du vendredi. Hotfix du samedi. Revert du dimanche.\nFix du fix. Fix du fix du fix. Titre du ticket : \"Fix\".\nIl s'agissait bien d'un cache. Comme d'hab.\nJe n'arrive pas à reproduire, donc ça n'existe pas.\nÇa marche en preprod. La preprod tape en prod. Donc ça marche en prod.\nMigration ODS, saison 3, épisode 47...\nTicket clôturé : on fait rien. Ticket rouvert : on fait toujours rien.\nDette technique : 61 tâches, 3 terminées, 58 en méditation.\nSentry : 1 tâche. Zéro bug. Mission accomplie.\nEstimation du niveau de filsdeputerie : élevé.\nProbablement un bug. Peut-être une feature. Sûrement le cache.\nLes mots de passe ne sont plus loggés en clair. Enfin, plus trop.\nÇa part en prod lundi. Ou mardi. Ou au GO de JL.\nTâches historiques : à supprimer, mais pas tout de suite...\nThrottle des erreurs Sentry : si on ne les voit pas, elles n'existent pas.\nTâche \"Clean php\" terminée. Le PHP n'est pas plus propre.\n\n# JL\nVu avec JL. Revu avec JL. À revoir avec JL.\nChargement à 99 %. Le dernier pourcent attend JL.\nRecette validée sur notre unique device de test : l'iPhone 15 Pro de JL.\nJL coupe l'AB test. JL relance l'AB test. JL veut un AB test de l'AB test.\nDemande de JL. Demande en plus de JL. Demande en plus du plus de JL.\nNe pas MEP avant le GO de JL. Pas de GO sans MEP. Deadlock.\nLe client râle ? Gift de 14 jours. Le bug persiste ? Gift de 14 jours.\nAprès point avec Ludo et JL : décision de refaire un point.\nJL n'arrive plus à se connecter. Priorité : absolue.\nLes messages autodétruits de JL refusent de s'autodétruire.\nRelance de JL. Relance de la relance. Ne pas hésiter.\nJL a eu une idée. Faites de la place dans le backlog.\nNotre premier choix : orange easyJet. Le second : orange easyJet.\n\n# Paiement\nExportation à l'international : tous nos euros sont désormais canadiens.\nRecherche d'une alerte Ethoca de 1,04 €. Budget : trois jours-homme.\nSwitch compagny, semaine 52. Toujours avec un \"g\".\nAnnonce de la bascule du canal payment. Réannonce. Ré-réannonce.\nNouveau PSP intégré ! Il sera remplacé mardi.\nPaddle, Quaife, Syspay, Truevo, Bluesnap, Dimoco... qui dit mieux ?\nCertificat Apple Pay renouvelé. Rendez-vous dans 3 mois.\nCron de rebill lancé deux fois. Le client est deux fois plus fidèle.\nAbonnement à vie : 0 vente. Abonnement 100 ans à 28,90 € : on y croit.\nEssai 2 semaines. Durée réelle : 1 semaine. Productivité : x2.\nUpsells à 0 €. Le CA reste stable.\nRemboursement de 1,14 € au lieu de 28,85 €. Le reste est un gift.\nTaux de 3DS cata depuis quelques mois. On surveille. Depuis quelques mois.\nRocketGate dit \"Do Not Try Again\". On réessaie.\nMoip a répondu ! En portugais.\nTjs des erreurs, je préconise de revert. Le revert a des erreurs.\nRAS suite à la bascule. (On n'a pas encore regardé.)\nFacture affilié du mois : -340 €. Félicitations, vous nous devez de l'argent.\nPoint CHB n°51. Les chargebacks vont bien, merci pour eux.\nMID inconnu. Il ne se connaît pas lui-même.\nSi nos offres FR marchaient au UK, ça se saurait. Ça ne se sait pas.\nChaque transaction compte. Surtout celles en CAD.\nCall to a member function getUserId() on null. Nous sommes tous null.\n\n# AB tests\nAB test phase 11, design \"voisin solitaire\". Phase 12 : \"voisin envahissant\".\nUpsell V4 \"SNCF\" : votre paiement a 20 minutes de retard.\nUpsell V6 \"Aérien\" : votre panier a été envoyé à Montréal.\nAB test V3.5 contre V11. Gagnant : la version de base.\nOn ne touche plus à la PDP. Sauf pour les 8 prochains AB tests.\nABC test 24/33/33. Les 10 % restants sont partis en Suisse.\nCopie du pricing Headway. Prochaine étape : copier leur CA.\n\n# Dating & IA\nRéduction de la créativité des IA. Elles inventaient trop.\nL'IA jure qu'elle a envoyé la photo. Elle ment, comme un vrai profil.\nL'IA a envoyé son prompt au lieu du message. Au moins, elle est transparente.\nL'IA passe en anglais en pleine conversation. Sorry, darling.\nGrok trop cher. Kimi trop cher à héberger. Retour à Clippy.\nFeed V4 : vous avez matché avec vous-même. Félicitations.\nLe même batch. Le même batch. Le même batch. Le même batch.\nBoost acheté. Boost acheté. Boost acheté. Boost à l'infini.\nVotre crédit cadeau pour pack de couches est prêt.\nNouveau message, il y a 2 ans. Envoyé ce matin.\nAbonnement stoppé par le service client à 3h du matin. Dévouement total.\nAutobot : \"Aucun abonnement actif.\" Le prélèvement : \"Ah si.\"\nShadowbanné, mais whitelisté. Le chat de Schrödinger du dating.\nFraudscore : 150... 300... 500... adjugé 1000 !\nPseudo refusé : Aaaaaaaaaaaaaaaa.\nRefus des photos noires. Étape 2 : refus des photos très noires.\nLes icebreakers supprimés reviennent le lendemain. Comme les ex.\nProfil qui a changé de sexe entre deux likes.\n13 % des descriptions refusées. Lesquelles ? Surprise.\nCe n'est pas de la fraude, l'aff est juste un petit malin.\nOn nous troll ?\nC'est pas nous. (C'était nous.)\n\"Ne plus recevoir de mail\" fonctionne-t-il ? Réponse par mail.\nAppel anonyme au SVI : pour le moment, ça crash.\nEffet Ken Burns amélioré. Personne ne sait qui est Ken Burns.\n\n# Trads, SSL, Biz & Mkt\nDemande de certificat SSL n°847. Damande HTPPS n°848.\nTrads PT remplacées par du FR. Mais tout est OK sur Locize.\nZone membre en espagnol pour tout le monde, sauf les Espagnols.\nMélange trad IT-ES : benvenido.\nMigration de Locize vers SimpleLocalize. Le bug migre aussi.\nRemplacement de \"March 2025\" par \"Mars 2025\". En octobre 2026.\nComparateur indépendant : nos sites sont 1er, 2e, 3e, 4e et 5e.\nLooker dit 12. HasOffers dit 15. Prelinker dit null.\nL'affilié relance : \"des news svp ?\" (x14)\n\"Urgent svp si possible today\" (envoyé en 2019).\nCapsule FightClub lue par la mauvaise voix. Première règle : on n'en parle pas.\nVidéos dupli \"top anciennes\", semaine 87. Elles ne sont plus si anciennes.\nLa croix bleue du popup est tombée dans le z-index.\nGarantie Légendaire : satisfait ou remboursé, après validation de JL.\nPlus que 100 places ! (Depuis 2023.)\nCheck-in hebdo Octopus : rien à signaler. Comme toutes les semaines.\nFaute d'ortographe dans Prelinker : corrigé dans Prelinker.\nTâche \"Congés\" : en retard.\n"
+    }
+  ],
+  "betterslackApi": 1,
+  "slackVersion": "4.51",
+  "tags": [
+    "appearance",
+    "fun"
+  ],
+  "readme": "README.md",
+  "readmes": {
+    "fr": "README.fr.md"
+  }
+}

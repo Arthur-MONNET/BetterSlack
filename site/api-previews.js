@@ -1312,6 +1312,47 @@
 .betterslack-row__actions > .betterslack-settings__input { width: 100%; }
 .betterslack-row__group { display: block; }
 
+/*
+ * A block of text: under its label, the row's whole width.
+ *
+ * Slack's text field is borrowed for the look, and it is a single-line field
+ * with a fixed height, so the height is given back here. The class is doubled
+ * for the reason the search box's is: Slack's stylesheet loads after this one.
+ */
+.betterslack-settings__row--wide { flex-direction: column; align-items: stretch; gap: 8px; }
+.betterslack-settings__row--wide > .betterslack-row__actions { width: 100%; }
+.betterslack-settings__text { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.betterslack-settings__textarea.betterslack-settings__textarea,
+.betterslack-editor__area.betterslack-editor__area {
+  height: auto;
+  min-height: 150px;
+  padding: 8px 10px;
+  line-height: 20px;
+  resize: vertical;
+  white-space: pre;
+  overflow: auto;
+}
+.betterslack-settings__textbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.betterslack-settings__count {
+  font-size: 12px;
+  color: rgba(var(--sk_foreground_max, 29, 28, 29), 0.6);
+}
+
+/* The same text, in a dialog of its own: wide, and as tall as the window allows. */
+#betterslack-text-editor.c-dialog { opacity: 1; z-index: 1101; }
+.betterslack-content--editor {
+  width: min(900px, calc(100% - 32px));
+  max-width: min(900px, calc(100% - 32px));
+  height: min(760px, calc(100% - 64px));
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+.betterslack-editor { flex: 1 1 auto; display: flex; min-height: 0; }
+.betterslack-editor__area.betterslack-editor__area { flex: 1 1 auto; min-height: 0; width: 100%; resize: none; }
+.betterslack-editor__actions { align-items: center; padding-top: 12px; }
+.betterslack-editor__spacer { flex: 1 1 auto; }
+
 /* ---- a mod's mark, and its page ---- */
 
 /*
@@ -1915,6 +1956,10 @@
       notRunning: "not running",
       settingsCount: "Settings ({count})",
       settingsHide: "Hide settings",
+      textLines: "{count} line(s)",
+      textExpand: "Expand",
+      textSave: "Save",
+      textRestore: "Restore the original",
       uses: "Uses {names}",
       needs: "Needs {names}",
       enableIt: "Enable it",
@@ -2057,6 +2102,10 @@
       notRunning: "n\u2019a pas d\xE9marr\xE9",
       settingsCount: "R\xE9glages ({count})",
       settingsHide: "Masquer les r\xE9glages",
+      textLines: "{count} ligne(s)",
+      textExpand: "Agrandir",
+      textSave: "Enregistrer",
+      textRestore: "R\xE9tablir le texte d\u2019origine",
       uses: "Utilise {names}",
       needs: "N\xE9cessite {names}",
       enableIt: "Activer le plugin",
