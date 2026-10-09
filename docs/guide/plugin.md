@@ -100,6 +100,31 @@ When the user changes a setting, the plugin is restarted with the new value.
 A plugin that registers `api.settings.onChange` is told instead and keeps
 running, for when a restart would show.
 
+The types are `boolean`, `number`, `text`, `textarea`, `colour` and `choice`.
+A `textarea` is for a list: it is drawn under its label at the width of the
+row, counts its lines, and has an **Expand** button that opens it in a dialog
+of its own, with **Restore the original** to put the manifest's text back.
+
+### A line on the start screen
+
+The start screen is up before any plugin runs, so a plugin cannot put words on
+it by calling something. It names a `textarea` setting instead, and the
+runtime picks one of its lines at random each time Slack starts:
+
+```json
+{
+  "splash": { "setting": "lines" },
+  "settings": [
+    { "key": "lines", "type": "textarea", "label": "Lines", "default": "# Greetings\nHello\nWelcome back" }
+  ]
+}
+```
+
+One line per entry; blank lines and lines starting with `#` are skipped. The
+user's value is read when there is one and the default when there is not, and
+every switched-on mod that names a setting is pooled. Splash Lines is the
+worked example.
+
 Settings are for preferences. A file -- a sound somebody picked, a picture, an
 export -- goes in `api.data`, the mod's own folder on disk:
 

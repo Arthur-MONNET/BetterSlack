@@ -284,6 +284,16 @@ export default {
 <pre class="api-code" data-lang="javascript" data-label="js"><code>const greeting = api.settings.get('greeting', 'Hello');
 api.ui.toast(greeting, { variant: 'success' });</code></pre>
 <p>When the user changes a setting, the plugin is restarted with the new value. A plugin that registers <code>api.settings.onChange</code> is told instead and keeps running, for when a restart would show.</p>
+<p>The types are <code>boolean</code>, <code>number</code>, <code>text</code>, <code>textarea</code>, <code>colour</code> and <code>choice</code>. A <code>textarea</code> is for a list: it is drawn under its label at the width of the row, counts its lines, and has an <strong>Expand</strong> button that opens it in a dialog of its own, with <strong>Restore the original</strong> to put the manifest's text back.</p>
+<h3>A line on the start screen</h3>
+<p>The start screen is up before any plugin runs, so a plugin cannot put words on it by calling something. It names a <code>textarea</code> setting instead, and the runtime picks one of its lines at random each time Slack starts:</p>
+<pre class="api-code" data-lang="json" data-label="json"><code>{
+  &quot;splash&quot;: { &quot;setting&quot;: &quot;lines&quot; },
+  &quot;settings&quot;: [
+    { &quot;key&quot;: &quot;lines&quot;, &quot;type&quot;: &quot;textarea&quot;, &quot;label&quot;: &quot;Lines&quot;, &quot;default&quot;: &quot;# Greetings\nHello\nWelcome back&quot; }
+  ]
+}</code></pre>
+<p>One line per entry; blank lines and lines starting with <code>#</code> are skipped. The user's value is read when there is one and the default when there is not, and every switched-on mod that names a setting is pooled. Splash Lines is the worked example.</p>
 <p>Settings are for preferences. A file -- a sound somebody picked, a picture, an export -- goes in <code>api.data</code>, the mod's own folder on disk:</p>
 <pre class="api-code" data-lang="javascript" data-label="js"><code>const { name } = await api.data.write(file.name, file);
 const blob = await api.data.read(name);</code></pre>

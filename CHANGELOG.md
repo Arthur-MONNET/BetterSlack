@@ -4,6 +4,26 @@ Written for the people upgrading. `pnpm release` seeds each section from the
 commits since the last tag; the release then rewrites it into something worth
 reading.
 
+## 3.7.1 — 2026-10-09
+
+### Added
+
+- **splash-lines:** 265 more lines, 367 in all, with sections for moderation and customer service
+
+## 3.7.0 — 2026-10-09
+
+### Added
+
+- **plugins:** Splash Lines, a random line on the start screen, on for everybody by default
+
+### Fixed
+
+- **panel:** a textarea setting sits right under its label
+
+### Other
+
+- **site:** rebuild the API previews after the textarea fix
+
 ## 3.6.0 — 2026-10-02
 
 ### Added

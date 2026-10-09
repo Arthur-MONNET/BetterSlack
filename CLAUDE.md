@@ -1498,6 +1498,15 @@ Shape of it:
   every launch -- so `keys` is not decoration. A cache that grows without limit
   is a slower start than the network it replaced. The member column keeps twelve
   channels of compact rows; the palette keeps four workspaces.
+- **A `textarea` setting is a list, and the panel treats it as one.** Drawn
+  under its label at the row's full width rather than beside it, with a line
+  count and an **Expand** button that opens the same text in a dialog of its
+  own (`openTextEditor` in `panel.ts`): Cancel, Save, Cmd/Ctrl+Enter, and
+  **Restore the original**, which refills it from the manifest and still waits
+  for Save. The row's box writes on `change`, never on `input`: every write
+  reloads the mod. Slack's `.c-input_text` is borrowed for the look and has a
+  fixed single-line height, so the height is given back with the class
+  doubled, as everywhere else Slack's stylesheet has to be beaten.
 - `api.helpers` — the first thing to reach for. `toggle` (persisted flag + a
   class on `<html>` so behaviour is pure CSS), `hotkey` (`mod+shift+f`, with a
   `when` guard that gates the *match* so an inapplicable shortcut does not
@@ -1900,6 +1909,17 @@ Four rules, all about it being a decoration over somebody's messaging app:
   attaches to a client that is already built, so without one the screen appears
   and vanishes inside a frame -- which reads as a flash of something broken.
 
+**A mod can put a line on it, by naming a setting.** No plugin has run while
+the screen is up, so nothing can be called: a manifest's `"splash": {
+"setting": "<key>" }` names a `textarea` setting (the catalogue refuses any
+other), and `splashLineFrom` reads that setting -- the user's value, or the
+manifest's default -- out of the boot payload and picks one line at random,
+pooled across every enabled mod that names one. Blank lines and `#` lines are
+skipped, so a list can keep sections. Safe mode shows none. The line sits
+between the mark and the progress, brighter than the progress, and a theme can
+recolour it with `--betterslack-splash-line`. It does not raise the 500ms
+floor: the screen is a cover for a start, not a reading break.
+
 It is in a shadow root with its own colours, because at document-start Slack's
 stylesheet has not loaded and its tokens do not exist yet: every colour carries
 a literal fallback and picks the token up by itself when a theme lands a moment
@@ -2081,9 +2101,20 @@ rail.
 ## The Mods panel
 
 The repository is a **catalogue**, not a set of pre-installed mods: a fresh
-install starts with `installed: []` and the user installs from the Browse shelf.
-`enabled` is always a subset of `installed`, enforced in `store.ts` so a
-hand-edited settings file cannot produce an enabled-but-not-installed state.
+install starts with nothing but the defaults and the user installs from the
+Browse shelf. `enabled` is always a subset of `installed`, enforced in
+`store.ts` so a hand-edited settings file cannot produce an
+enabled-but-not-installed state.
+
+**A default is offered once, and then it is the user's.** A manifest marked
+`"defaultEnabled": true` is installed and switched on by the loader at start
+(`seedDefaultMods`, before the bootstrap is built) and its id written to
+`settings.seeded`. That one rule covers a first install and the first start
+after an update that brings the mod, and it is why switching one off holds:
+an id in `seeded` is never switched on again. Only the repository's own folder
+decides -- `Catalog.defaultIds()` reads the builtin scan, so a copy under the
+home neither drops the default nor makes itself one. Splash Lines is the one
+shipped this way. `tests/defaults.test.mjs` covers it.
 
 The panel and `api.ui.modal` render into the **light DOM** wearing Slack's own
 `c-dialog` / `c-menu` / `c-button` classes, so Slack's stylesheet styles them

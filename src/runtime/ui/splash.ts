@@ -63,6 +63,56 @@ export function splashVarsFrom(payload: ThemeSource): string {
   return [...found].map(([name, value]) => `${name}: ${value};`).join(' ');
 }
 
+/** What `splashLineFrom` reads: the slice of the boot payload that names a mod's lines. */
+interface LineSource {
+  settings: { enabled: string[]; modSettings: Record<string, Record<string, unknown>> };
+  mods: Array<{
+    id: string;
+    splash?: { setting: string };
+    settings?: Array<{ key: string; default?: unknown }>;
+  }>;
+}
+
+/**
+ * The lines a switched-on mod has for the start screen, pooled across mods.
+ *
+ * A mod names a `textarea` setting in its manifest (`splash`), and this reads
+ * that setting out of the boot payload -- the user's value, or the manifest's
+ * default when they have never touched it. Read here rather than handed over
+ * by the mod because the screen is up from the first frame and no plugin has
+ * run yet; by the time one could say anything, the screen is coming down.
+ *
+ * One line per entry. Blank lines and lines starting with # are skipped, so a
+ * long list can be kept in sections.
+ */
+export function splashLinesFrom(payload: LineSource): string[] {
+  const lines: string[] = [];
+  try {
+    for (const id of payload.settings.enabled) {
+      const mod = payload.mods.find((candidate) => candidate.id === id);
+      const key = mod?.splash?.setting;
+      if (!mod || !key) continue;
+      const saved = payload.settings.modSettings[id]?.[key];
+      const fallback = mod.settings?.find((field) => field.key === key)?.default;
+      const text = typeof saved === 'string' ? saved : typeof fallback === 'string' ? fallback : '';
+      for (const raw of text.split('\n')) {
+        const line = raw.trim();
+        if (line && !line.startsWith('#')) lines.push(line);
+      }
+    }
+  } catch {
+    return [];
+  }
+  return lines;
+}
+
+/** One of them, at random, or nothing at all when there are none. */
+export function splashLineFrom(payload: LineSource, random: () => number = Math.random): string {
+  const lines = splashLinesFrom(payload);
+  if (lines.length === 0) return '';
+  return lines[Math.min(lines.length - 1, Math.floor(random() * lines.length))]!;
+}
+
 /** Long enough for a slow client, short enough that a wedged one still clears. */
 const CEILING_MS = 20_000;
 
@@ -136,6 +186,26 @@ const CSS = `
 .stage--art .art { opacity: 1; }
 .stage--art .mark { opacity: 0; }
 
+/*
+ * A line a mod put on the start screen. The words are the point of it, so it
+ * is the brightest thing under the mark, and the progress line stays quieter
+ * beneath it. A theme can recolour it like the rest of the screen.
+ */
+.line {
+  max-width: min(560px, calc(100vw - 48px));
+  margin-top: -6px;
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--betterslack-splash-line, var(--dt_color-content-pry, rgba(232, 232, 232, .92)));
+  animation: line-in 420ms cubic-bezier(.2, .9, .3, 1.2) both;
+}
+@keyframes line-in {
+  from { opacity: 0; transform: translateY(6px) scale(.96); }
+  to { opacity: 1; transform: none; }
+}
+
 .label {
   min-height: 18px;
   font-size: 13px;
@@ -158,6 +228,7 @@ const CSS = `
  */
 @media (prefers-reduced-motion: reduce) {
   .mark { animation: breathe 2s ease-in-out infinite; }
+  .line { animation: none; }
   @keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 }
 `;
@@ -205,7 +276,7 @@ const NOTHING: Splash = { progress: () => undefined, done: () => undefined };
  * Returns immediately. Nothing here is awaited by `boot()`: a splash that could
  * hold up the runtime would be a decoration with the power to stop the app.
  */
-export function showSplash(art?: Promise<string | null>, themeVars = ''): Splash {
+export function showSplash(art?: Promise<string | null>, themeVars = '', line = ''): Splash {
   if (typeof document === 'undefined') return NOTHING;
 
   let host: HTMLElement | null = null;
@@ -244,7 +315,14 @@ export function showSplash(art?: Promise<string | null>, themeVars = ''): Splash
       // happened at document-start, where there is no <html> to read a language
       // off and the translator answers with nothing.
       label.textContent = pending || t('splashLoading');
-      root.append(style, stage, label);
+      root.append(style, stage);
+      if (line) {
+        const words = document.createElement('div');
+        words.className = 'line';
+        words.textContent = line;
+        root.append(words);
+      }
+      root.append(label);
       document.body.append(host);
     } catch {
       // A splash that throws must cost nothing: the app behind it is fine.

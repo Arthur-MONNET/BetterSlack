@@ -64,6 +64,7 @@ export async function readSettings(): Promise<Settings> {
       slackPrefs:
         parsed.slackPrefs && typeof parsed.slackPrefs === 'object' ? parsed.slackPrefs : {},
       dockIconAsked: parsed.dockIconAsked === true,
+      seeded: Array.isArray(parsed.seeded) ? parsed.seeded.filter((x) => typeof x === 'string') : [],
     };
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
@@ -240,5 +241,34 @@ export function setModInstalled(id: string, installed: boolean): Promise<Setting
     };
     await writeSettings(next);
     return next;
+  });
+}
+
+/**
+ * Install and switch on the catalogue's default mods, each once per person.
+ *
+ * Called at every start with the ids of the `builtin` mods marked
+ * `defaultEnabled`. Anything not yet in `seeded` is installed, switched on and
+ * written down; anything already there is left exactly as the person left it.
+ * That is what makes it a default: a first install and an update that brings a
+ * new marked mod both end with it running, and somebody who switched it off
+ * keeps it off.
+ *
+ * Writes nothing when there is nothing new, so an ordinary start costs one read.
+ */
+export function seedDefaultMods(ids: string[]): Promise<{ settings: Settings; added: string[] }> {
+  return serialize(async () => {
+    const current = await readSettings();
+    const seeded = current.seeded ?? [];
+    const added = ids.filter((id) => !seeded.includes(id));
+    if (added.length === 0) return { settings: current, added };
+    const next: Settings = {
+      ...current,
+      installed: [...new Set([...current.installed, ...added])],
+      enabled: [...new Set([...current.enabled, ...added])],
+      seeded: [...seeded, ...added],
+    };
+    await writeSettings(next);
+    return { settings: next, added };
   });
 }
